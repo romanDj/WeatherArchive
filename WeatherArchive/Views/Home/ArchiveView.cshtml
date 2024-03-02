@@ -1,0 +1,149 @@
+﻿@model WeatherArchive.Models.ArchiveView.IndexViewModel
+@{
+    ViewData["Title"] = "Просмотр архивов";
+}
+
+<nav class="mt-5" style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Просмотр архивов</li>
+    </ol>
+</nav>
+
+<div class="mt-2">
+    <h1 class="display-6">Просмотр архивов погоды в Москве</h1>
+</div>
+@if (Model.Weathers.Count() == 0)
+{
+    <div class="my-3">
+        <p class="text-secondary">архив пуст...</p>
+    </div>
+}
+else
+{
+    <form method="get">
+        <div class="row">
+            <div class="col">
+                <label>Год: </label>
+                <select name="year" asp-for="FilterViewModel.SelectedYear" asp-items="Model.FilterViewModel.Years" class="form-control"></select>
+            </div>
+            <div class="col">
+                <label>Месяц: </label>
+                <select name="month" asp-for="FilterViewModel.SelectedMonth" asp-items="Model.FilterViewModel.Months" class="form-control"></select>
+            </div>
+            <div class="col align-self-end">
+                <input type="submit" value="Фильтр" class="btn btn-outline-success" />
+            </div>
+        </div>      
+    </form>
+
+    <div class="table-responsive">
+        <table class="table my-2 table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th class="align-middle text-center">
+                        Дата
+                    </th>
+                    <th class="align-middle text-center">
+                        Время
+                    </th>
+                    <th class="align-middle text-center">
+                        Темп.<br>(гр. Ц.)
+                    </th>
+                    <th class="align-middle text-center">
+                        Отн. влажность<br>(%)
+                    </th>
+                    <th class="align-middle text-center">
+                        Точка росы<br>(гр. Ц.)
+                    </th>
+                    <th class="align-middle text-center">
+                        Атм. давление<br>(мм рт.ст.)
+                    </th>
+                    <th class="align-middle text-center">
+                        Направление<br>ветра
+                    </th>
+                    <th class="align-middle text-center">
+                        Скорость<br>ветра
+                    </th>
+                    <th class="align-middle text-center">
+                        Облачность<br>(%)
+                    </th>
+                    <th class="align-middle text-center">
+                        Нижняя<br>гр. облачности (м)
+                    </th>
+                    <th class="align-middle text-center">
+                        Гориз.<br>видимость (км)
+                    </th>
+                    <th class="align-middle text-center">
+                        Погодные<br>явления
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Weathers)
+                {
+                    <tr>
+                        <td>
+                            @item.GetDate()
+                        </td>
+                        <td>
+                            @item.GetTime()
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Temp)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AirHumidity)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DewPoint)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AtmPressure)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DirWind)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SpeedWind)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Cloudy)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.BottomCloudy)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.HorVisibility)
+                        </td>
+                        <td style="width: 250px;">
+                            @Html.DisplayFor(modelItem => item.WeatherCond)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    var prevDisabled = !Model.PageViewModel.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.PageViewModel.HasNextPage ? "disabled" : "";
+
+    <a asp-action="ArchiveView"      
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+       asp-route-year="@(Model.FilterViewModel.SelectedYear)"
+       asp-route-month="@(Model.FilterViewModel.SelectedMonth)"
+       class="btn btn-default @prevDisabled btn-outline-primary">
+        Назад
+    </a>
+    <a asp-action="ArchiveView"      
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       asp-route-year="@(Model.FilterViewModel.SelectedYear)"
+       asp-route-month="@(Model.FilterViewModel.SelectedMonth)"
+       class="btn btn-default @nextDisabled btn-outline-primary">
+        Вперед
+    </a>
+}
+
+

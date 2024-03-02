@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Загрузка архивов";
+}
+
+<nav class="mt-5" style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Загрузка архивов</li>
+    </ol>
+</nav>
+
+<div>
+    <form id="fileUploadForm">
+        <div class="mb-3">
+            <label class="form-label d-block">Выберите архивы погодных условий (файлы Excel)</label>
+            <input type="file" class="border rounded p-2" multiple required accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+            Загрузить
+        </button>
+    </form>
+</div>
+<script>
+    //обработчик формы
+    document.getElementById("fileUploadForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const fileInput = document.querySelector('#fileUploadForm input[type="file"]');
+        //проверяем выбраны ли файлы
+        if (fileInput.files.length === 0) {
+            alert("Для отправки требуется выбрать файл.");
+            return;
+        }
+        //требуемы расширения файлов
+        const validExts = [".xlsx", ".xls"];
+
+        const formData = new FormData();
+
+        for (var i = 0; i < fileInput.files.length; i++) {
+
+            const name = fileInput.files[i].name;
+            const fileExt = name.substring(name.lastIndexOf('.'));
+            //проверяем формат
+            if (validExts.indexOf(fileExt) < 0) {
+                alert("Выбран файл c не верным форматом, валидные расширения " +
+                    validExts.toString() + "");
+                return;
+            }
+            formData.append('files[]', fileInput.files[i]);
+        }
+
+        const loader = document.querySelector('#fileUploadForm .spinner-border');
+        loader.style.display = 'inline-block';
+
+        //отправка на сервер
+        fetch('/api/archive/upload', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            fileInput.value = null;
+            loader.style.display = 'none';
+            if (response.ok) {
+                alert('Архивы успешно загружены.');
+            } else {
+                alert('Произошла ошибка при загрузке архивов.');
+            }          
+        }).catch(error => {
+            console.error('Error:', error);
+            loader.style.display = 'none';
+        });
+    });
+</script>
